@@ -15,9 +15,11 @@ namespace MineSweeper
         static Mine game;
         static int x = 0;
         static int y = 0;
+        static bool exit = false;
 
         static void Main(string[] args)
         {
+            while (!exit) { 
             //validate args
             if (!validateArgs(ref args)) return;
 
@@ -50,12 +52,14 @@ namespace MineSweeper
                         displayGrid(x, y);
                         Console.SetCursorPosition(0, game.Height + startGrid + 7);
                         pressAnyKey();
+                        
                         break;
                     }
                 }
                 //redisplay
                 displayGrid(x,y);
 
+            }
             }
         }
 
@@ -80,8 +84,10 @@ namespace MineSweeper
 
         static void pressAnyKey()
         {
-            Console.WriteLine("Press any key to contiue.");
-            Console.ReadKey();
+            Console.WriteLine("Press A to play again \nor any other key to exit.");
+            Console.SetCursorPosition(x, y);
+            var key = Console.ReadKey();
+            if (key.Key != ConsoleKey.A) exit = true;
         }
 
         static void initDisplay()
@@ -90,13 +96,10 @@ namespace MineSweeper
 
             Console.SetWindowSize(game.Width + 25, game.Height + 25);
 
-            Console.SetCursorPosition(0, 0);
-            Console.Write("Mines Left: " + game.MinesLeft());
-
             displayGrid(startGrid,startGrid);
 
             Console.SetCursorPosition(0, game.Height + startGrid + 1);
-            Console.Write("Select position. \nPress space to try square.");
+            Console.Write("Select position. \nPress space to try square.\nPress M to mark.");
 
             Console.SetCursorPosition(startGrid, startGrid);
         }
@@ -108,14 +111,17 @@ namespace MineSweeper
                 for (int j=0; j< game.Height; j++)
                 {
                     Console.SetCursorPosition(startGrid + i, startGrid + j);
-                    if (game.intClicked[i, j] == 1)
+                    if (game.intClicked[i, j] > 0)
                     {
-                        if (game.intMainGrid[i, j] < 0) Console.Write("*");
+                        if (game.intClicked[i, j] == 2 && !game.Win && !game.Loss) Console.Write("M");
+                        else if (game.intMainGrid[i, j] < 0) Console.Write("*");
                         else Console.Write(game.intMainGrid[i, j]);
                     }
                     else Console.Write("X");
                 }
             }
+            Console.SetCursorPosition(0, 0);
+            Console.Write("Mines Left: " + game.MinesLeft() + "   ");
             Console.SetCursorPosition(csrRow, csrCol);
         }
 
@@ -147,6 +153,11 @@ namespace MineSweeper
             {
                 y += 1;
                 if (y > startGrid + game.Height - 1) y = startGrid + game.Height - 1;
+            }
+
+            if (key.Key == ConsoleKey.M)
+            {
+                game.markSquare(x - startGrid, y - startGrid);
             }
 
             Console.SetCursorPosition(x, y);

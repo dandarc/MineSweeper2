@@ -53,7 +53,7 @@ namespace MineSweeper
         {
             return Mines - MinesID;
         }
-
+        
         //returns true if continue, returns false if not continue
         public bool CheckSquare(int x, int y)
         {
@@ -61,32 +61,64 @@ namespace MineSweeper
             if (this.intMainGrid[x, y] == -1)
             {
                 Loss = true;
+                clickAll();
                 return false;
             }
             else
             {
+                //sum adjacent squares
+                addSquares(x, y);
+
                 //check for win
                 int sum = 0;
                 for (int i = 0; i < Width; i++)
                 {
                     for (int j = 0; j < Height; j++)
                     {
-                        sum += intClicked[i, j];
+                        if (intClicked[i, j] == 1)
+                        {
+                            sum++;
+                        }
                     }
                 }
                 if (sum == Width * Height - Mines)
                 {
                     Win = true;
+                    clickAll();
                     return false;
                 }
 
-                //sum adjacent squares
-                addSquares(x, y);
+                
 
                 return true;
             }
         }
 
+        public void markSquare(int x, int y)
+        {
+            if (intClicked[x,y] == 0)
+            {
+                intClicked[x, y] = 2;
+                MinesID += 1;
+            }
+            else if (intClicked[x,y] == 2)
+            {
+                intClicked[x, y] = 0;
+                MinesID -= 1;
+            }
+        }
+
+        void clickAll()
+        {
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    intClicked[i,j] = 1;
+                    if (intMainGrid[i,j] >= 0) addSquares(i, j);
+                }
+            }
+        }
         void addSquares(int x, int y)
         {
             int adjMines = 0;
@@ -106,6 +138,24 @@ namespace MineSweeper
             }
 
             intMainGrid[x, y] = adjMines;
+
+            if (adjMines == 0)
+            {
+                for (int i = x - 1; i <= x + 1; i++)
+                {
+                    for (int j = y - 1; j <= y + 1; j++)
+                    {
+                        if (i >= 0 && i <= Width - 1 && j >= 0 && j <= Height - 1)
+                        {
+                            if (intClicked[i, j] < 1)
+                            {
+                                intClicked[i, j] = 1;
+                                addSquares(i, j);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
